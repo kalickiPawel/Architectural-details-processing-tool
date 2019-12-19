@@ -1,0 +1,78 @@
+version: "3"
+services:
+  flask:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    container_name: backend-flask
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV}
+      APP_DEBUG: ${APP_DEBUG}
+      APP_PORT: ${APP_PORT}
+      MONGODB_DATABASE: ${APP_MONGO_DB}
+      MONGODB_USERNAME: ${APP_MONGO_USER}
+      MONGODB_PASSWORD: ${APP_MONGO_PASS}
+      MONGODB_HOSTNAME: ${MONGO_HOST}
+    volumes:
+      - appdata:/var/www
+    depends_on:
+      - mongodb
+    networks:
+      - frontend
+      - backend
+
+  mongodb:
+    image: mongo:4.0.8
+    container_name: mongodb
+    restart: unless-stopped
+    command: mongod --auth
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_ROOT_USER: ${MONGO_ROOT_USERNAME}
+      MONGO_ROOT_PASS: ${MONGO_ROOT_PASSWORD}
+      APP_MONGO_HOST: ${MONGO_HOST}
+      APP_MONGO_USER: ${APP_MONGO_USER}
+      APP_MONGO_PASS: ${APP_MONGO_PASS}
+      APP_MONGO_DB: ${APP_MONGO_DB}
+    volumes:
+      - mongodbdata:/data/db
+    networks:
+      - backend
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    container_name: frontend-react
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV}
+      APP_NAME: ${APP_NAME}
+      APP_DEBUG: ${APP_DEBUG}
+      SERVICE_NAME: "frontend-react"
+    ports:
+      - "8084:80"
+      - "443:443"
+    volumes:
+      - reactdata:/var/log/react
+    depends_on:
+      - flask
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+
+volumes:
+  mongodbdata:
+    driver: local
+  appdata:
+    driver: local
+  reactdata:
+    driver: local
