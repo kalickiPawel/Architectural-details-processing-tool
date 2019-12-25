@@ -18,7 +18,7 @@ services:
     build:
       context: mongodb
       dockerfile: Dockerfile
-    container_name: db_mongo
+    container_name: db-mongo
     environment:
       - MONGODB_ADMIN_USER=admin
       - MONGODB_ADMIN_PASS=adminpass
