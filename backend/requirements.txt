@@ -1,5 +1,7 @@
-Flask==1.0.2
-Flask-PyMongo==2.2.0
+Flask==1.1.1
+PyMongo==3.10.0
 requests==2.20.1
 jsonify==0.5
 python-dotenv==0.10.3
+connexion==2.5.1
+swagger-ui-bundle==0.0.6
