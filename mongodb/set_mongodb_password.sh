@@ -29,15 +29,13 @@ sleep 3
 # First it authenticates to Mongo using the admin user it created above.
 # Then it switches to the REST API database and runs the createUser command 
 # to actually create the user and assign it to the database.
-if [ "$MONGODB_APPLICATION_DATABASE" != "admin" ]; then
-    echo "=> Creating an ${MONGODB_APPLICATION_DATABASE} user with a password in MongoDB"
-    mongo admin -u $MONGODB_ADMIN_USER -p $MONGODB_ADMIN_PASS << EOF
+echo "=> Creating an ${MONGODB_APPLICATION_DATABASE} user with a password in MongoDB"
+mongo admin -u $MONGODB_ADMIN_USER -p $MONGODB_ADMIN_PASS << EOF
 use $MONGODB_APPLICATION_DATABASE
-db.createUser({user: '$MONGODB_APPLICATION_USER', pwd: '$MONGODB_APPLICATION_PASS', roles:[{role:'dbOwner', db:'$MONGODB_APPLICATION_DATABASE'}]})
+db.createUser({user: '$MONGODB_APPLICATION_USER', pwd: '$MONGODB_APPLICATION_PASS', roles:[{role:'read', db: 'admin'}, {role:'dbOwner', db:'$MONGODB_APPLICATION_DATABASE'}]})
 EOF
-fi
- 
-sleep 1
+
+sleep 3
  
 # If everything went well, add a file as a flag so we know in the future to not re-create the
 # users if we're recreating the container (provided we're using some persistent storage)
