@@ -13,6 +13,10 @@ class ConnectMongoDB:
         config.read(config_file)
         return config
 
+    def set_collection(self, collection):
+        coll = self.db.collection
+        return coll
+
     def connect_db(self):
         uri = uri = "mongodb://%s:%s@%s:%s" % (
             self.config['mongo']['username'],
