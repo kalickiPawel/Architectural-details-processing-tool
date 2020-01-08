@@ -27,8 +27,3 @@ class ConnectMongoDB:
         client = MongoClient(uri)
         db = client[self.config['mongo']['dbname']]
         return client, db
-
-
-connect = ConnectMongoDB()
-print(type(connect))
-print(connect)
