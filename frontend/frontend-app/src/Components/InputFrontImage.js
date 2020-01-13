@@ -45,10 +45,10 @@ class InputFrontImage extends Component {
                 id_coords: lastID + 1,
                 x_val: listValueX,
                 y_val: listValueY,
-                method: 'linear'
+                method: 'cubic'
             })
                 .then(function (response) {
-                    console.log(response);
+                    console.log(response.data);
                 })
                 .catch(function (error) {
                     console.log(error);
@@ -62,7 +62,7 @@ class InputFrontImage extends Component {
         this.setState({
             mouseCoords: {
                 x: this.state.mouseCoords.x.concat(e.nativeEvent.offsetX),
-                y: this.state.mouseCoords.y.concat(e.nativeEvent.offsetY)
+                y: this.state.mouseCoords.y.concat(e.nativeEvent.offsetY * -1)
             }
         });
     }
