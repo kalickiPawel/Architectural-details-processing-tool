@@ -1,3 +1,4 @@
+import logger
 from flask import make_response, abort
 from connect_mongo import ConnectMongoDB
 from modules.interp_result import point
@@ -8,7 +9,6 @@ ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 os.environ.update({'ROOT_PATH': ROOT_PATH})
 sys.path.append(os.path.join(ROOT_PATH, 'modules'))
 
-import logger
 
 LOG = logger.get_root_logger(os.environ.get(
     'ROOT_LOGGER', 'root'), filename=os.path.join(ROOT_PATH, 'output.log'))
@@ -30,10 +30,10 @@ def read_all():
 
     def get_points(document):
         return {
+            "id_element": document['id'],
             "x_values": document['x_values'],
             "y_values": document['y_values'],
-            "interp_x": document['interp_x'],
-            "interp_y": document['interp_y'],
+            "interp": document['interp'],
             "method": document['method']
         }
 
@@ -57,10 +57,10 @@ def read_one(id_element):
     if col.find_one({"id": id_element}) is not None:
         document = col.find_one({"id": id_element})
         point = {
+            "id_element": document['id'],
             "x_values": document['x_values'],
             "y_values": document['y_values'],
-            "interp_x": document['interp_x'],
-            "interp_y": document['interp_y'],
+            "interp": document['interp'],
             "method": document['method']
         }
 
@@ -98,17 +98,12 @@ def create(element):
     if col.find_one({"id": id_element}) is None:
 
         interpolate = point.get_interp_result((x_values, y_values), method)
-        interp_x, interp_y = [], []
-        for interp in interpolate:
-            interp_x.append(interp['x'])
-            interp_y.append(interp['y'])
 
         result = col.insert_one({
             'id': id_element,
             'x_values': x_values,
             'y_values': y_values,
-            'interp_x': interp_x,
-            'interp_y': interp_y,
+            'interp': interpolate,
             'method': method
         })
         return make_response(
@@ -149,16 +144,11 @@ def update(id_element, element):
     if col.find_one({"id": id_element}) is not None:
 
         interpolate = point.get_interp_result((x_values, y_values), method)
-        interp_x, interp_y = [], []
-        for interp in interpolate:
-            interp_x.append(interp['x'])
-            interp_y.append(interp['y'])
 
         result = col.update_one({"id": id_element}, {'$set': {
             "x_values": x_values,
             "y_values": y_values,
-            'interp_x': interp_x,
-            'interp_y': interp_y,
+            'interp': interpolate,
             "method": method
         }})
         if result.modified_count:
