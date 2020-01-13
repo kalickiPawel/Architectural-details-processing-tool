@@ -7,7 +7,7 @@ def get_interp_result(coords, method):
 
     n = len(x)
     s = [i for i in range(n)]
-    t = np.linspace(0, n-1, 100)
+    t = np.linspace(0, n-1, n*50)
 
     u = interp1d(s, x, kind=method)
     v = interp1d(s, y, kind=method)
