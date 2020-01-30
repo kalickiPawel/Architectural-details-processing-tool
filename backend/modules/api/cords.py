@@ -33,6 +33,7 @@ def read_all():
             "id_element": document['id'],
             "x_values": document['x_values'],
             "y_values": document['y_values'],
+            "z_values": document['z_values'],
             "interp": document['interp'],
             "method": document['method']
         }
@@ -60,6 +61,7 @@ def read_one(id_element):
             "id_element": document['id'],
             "x_values": document['x_values'],
             "y_values": document['y_values'],
+            "z_values": document['z_values'],
             "interp": document['interp'],
             "method": document['method']
         }
@@ -92,17 +94,20 @@ def create(element):
     id_element = element.get("id_coords", None)
     x_values = element.get("x_val", None)
     y_values = element.get("y_val", None)
+    z_values = element.get("z_val", None)
     method = element.get("method", None)
 
     # Does the person exist already?
     if col.find_one({"id": id_element}) is None:
 
-        interpolate = point.get_interp_result((x_values, y_values), method)
+        interpolate = point.get_interp_result(
+            (x_values, y_values, z_values), method)
 
         result = col.insert_one({
             'id': id_element,
             'x_values': x_values,
             'y_values': y_values,
+            'z_values': z_values,
             'interp': interpolate,
             'method': method
         })
@@ -137,13 +142,15 @@ def update(id_element, element):
 
     x_values = element.get("x_val", None)
     y_values = element.get("y_val", None)
+    z_values = element.get("z_val", None)
     method = element.get("method", None)
 
     # Does the person exist in people?
 
     if col.find_one({"id": id_element}) is not None:
 
-        interpolate = point.get_interp_result((x_values, y_values), method)
+        interpolate = point.get_interp_result(
+            (x_values, y_values, z_values), method)
 
         result = col.update_one({"id": id_element}, {'$set': {
             "x_values": x_values,
