@@ -8,6 +8,7 @@ RUN mkdir /app
 WORKDIR /app
 
 ENV PATH /app/node_modules/.bin:$PATH
+ENV NODE_OPTIONS=--max_old_space_size=8192
 
 COPY /frontend-app/package.json /app/package.json
 RUN npm install --silent
