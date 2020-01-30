@@ -1,60 +1,35 @@
-import React, { Component } from 'react';
-import CanvasJSReact from '../assets/canvasjs.react';
-import axios from 'axios';
-var CanvasJSChart = CanvasJSReact.CanvasJSChart;
+import React from "react";
+import Plot from 'react-plotly.js';
+import { connect } from 'react-redux';
 
-class InterpChart extends Component {
-
-    state = {
-        elements: []
-    }
-
-    componentDidMount() {
-        this.interval = setInterval(() =>
-            axios.get('http://localhost:5000/api/cords').then(res => {
-                const elements = res.data;
-                this.setState({ elements });
-            }).catch((error) => {
-                console.log(error)
-            }), 1000);
-    }
+class InterpChart extends React.Component {
 
     render() {
-        const dataLen = this.state.elements.length;
-        const options = {
-            theme: "light2",
-            animationEnabled: true,
-            zoomEnabled: true,
-            title: {
-                text: "Result of Interpolation",
-                fontSize: 20
-            },
-            axisX: {
-                gridLines: {
-                    display: false
-                }
-            },
-            axisY: {
-                gridThickness: 0,
-            },
-            data: [{
-                type: "line",
-                markerSize: 0,
-                toolTipContent: "<b>X value: </b>{x}<br/><b>Y value: </b>{y}",
-                dataPoints: this.state.elements.map((element) => element.interp.map(point => point)
-                )[dataLen - 1],
-            }]
-        }
-
         return (
-            <div>
-                <CanvasJSChart options={options}
-                /* onRef={ref => this.chart = ref} */
+            <div className="container pl-0">
+                <Plot
+                    data={[
+                        {
+                            x: this.props.xList.map((element) => element),
+                            y: this.props.yList.map((element) => element),
+                            z: this.props.zList.map((element) => element),
+                            type: 'mesh3d',
+                        },
+                    ]}
+                    layout={{ width: 400, height: 500, title: 'Przetworzony model 3D' }}
                 />
-                {/*You can get reference to the chart instance as shown above using onRef. This allows you to access all chart properties and methods*/}
             </div>
         );
     }
 }
 
-export default InterpChart;
+const mapStateToProps = (state) => {
+    return {
+        xList: state.interpCoords.x,
+        yList: state.interpCoords.y,
+        zList: state.interpCoords.z,
+        method: state.method
+    }
+}
+
+export default connect(mapStateToProps)(InterpChart);

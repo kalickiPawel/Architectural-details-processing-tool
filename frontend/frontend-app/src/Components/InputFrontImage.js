@@ -1,17 +1,25 @@
-import React, { Component } from 'react';
-import axios from 'axios';
+import React from "react";
+import Dot from './Dot';
 
-class InputFrontImage extends Component {
-    state = {
-        elements: [],
-        mouseCoords: { x: [], y: [] },
-        selectedFile: null,
-        imagePreviewUrl: null
-    };
+export class InputFrontImage extends React.Component {
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            elements: [],
+            mouseCoords: { x: [], y: [] },
+            selectedFile: null,
+            imagePreviewUrl: null,
+            webstate: true
+        };
+
+    }
 
     fileChangedHandler = event => {
         this.setState({
-            selectedFile: event.target.files[0]
+            selectedFile: event.target.files[0],
+            webstate: false
         })
 
         let reader = new FileReader();
@@ -25,84 +33,40 @@ class InputFrontImage extends Component {
         reader.readAsDataURL(event.target.files[0])
 
     }
-    componentDidMount() {
-        this.interval = setInterval(() =>
-            axios.get('http://localhost:5000/api/cords').then(res => {
-                const elements = res.data;
-                this.setState({ elements });
-            }).catch((error) => {
-                console.log(error)
-            }), 1000);
-    }
-
-    submit = () => {
-        const dataLen = this.state.elements.length;
-        const lastID = this.state.elements.map((element) => element.id_element)[dataLen - 1];
-        const listValueX = this.state.mouseCoords.x;
-        const listValueY = this.state.mouseCoords.y;
-        if (listValueY.length > 0 && listValueY.length > 0) {
-            axios.post('http://localhost:5000/api/cords', {
-                id_coords: lastID + 1,
-                x_val: listValueX,
-                y_val: listValueY,
-                method: 'cubic'
-            })
-                .then(function (response) {
-                    console.log(response.data);
-                })
-                .catch(function (error) {
-                    console.log(error);
-                });
-        }
-        else {
-            console.log("Points not found");
-        }
-    }
-    onMouseClick = (e) => {
-        this.setState({
-            mouseCoords: {
-                x: this.state.mouseCoords.x.concat(e.nativeEvent.offsetX),
-                y: this.state.mouseCoords.y.concat(e.nativeEvent.offsetY * -1)
-            }
-        });
-    }
-
-    clearPoints = () => {
-        this.setState({
-            mouseCoords: {
-                x: [],
-                y: [],
-            }
-        })
-    }
 
     render() {
-
         let $imagePreview = (
             <div className="previewText image-container">
-                Please select an Image for Preview
+                1. Wybierz najpierw materiał poglądowy:
+                <div className="custom-file">
+                    <input type="file" className="custom-file-input" id="customFileLang" lang="pl-Pl" onChange={this.fileChangedHandler} />
+                    <label className="custom-file-label" htmlFor="customFileLang">Wybierz pliki graficzne</label>
+                </div>
             </div>
         );
         if (this.state.imagePreviewUrl) {
+            var sectionStyle = {
+                border: "2px dotted #17a2b8",
+                width: "100%",
+                height: "300px",
+                backgroundImage: "url(" + this.state.imagePreviewUrl + ")",
+                position: "relative",
+            };
             $imagePreview = (
-                <div className="image-container" >
-                    <img onKeyDown={this.onKeyDown} onClick={this.onMouseClick} src={this.state.imagePreviewUrl} alt="icon" width="100%" />
-                </div>
+                < div className="image-container" >
+                    2. Kliknij w poniższym polu, aby dodać punkty:
+                    <div style={sectionStyle} className="dot-wrapper" onKeyDown={this.onKeyDown} onClick={this.props.onMouseClick} src={this.state.imagePreviewUrl}>
+                        {this.props.dots.map((dot, i) =>
+                            <Dot key={i} x={dot.x} y={dot.y} />
+                        )}
+                    </div>
+                </div >
             );
         }
-        /*
-        if (this.state.mouseCoords.y.length > 0)
-            console.log(this.state.mouseCoords);
-        */
         return (
-            <div className="col-sm-4">
-                <input type="file" name="avatar" onChange={this.fileChangedHandler} />
+            <div>
                 {$imagePreview}
-                <button type="button" onClick={this.submit} > Interpolate </button>
-                <button type="button" onClick={this.clearPoints} > Clear Points </button>
-            </div>
+            </div >
         );
     }
 }
-
-export default InputFrontImage;
